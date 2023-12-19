@@ -1,0 +1,19 @@
+﻿[
+    {
+        "Template":  "es",
+        "Subject":  "Caducidad de la contraseña",
+        "Filter":  "$_.CanonicalName -like '*/ESPANA/*'",
+        "Priority":  10
+    },
+    {
+        "Template":  "fr",
+        "Subject":  "Expiration de votre mot de passe",
+        "Filter":  "$_.CanonicalName -match '/FRANCE/|/BELGIQUE/'",
+        "Priority":  10
+    },
+    {
+        "Template":  "default",
+        "Subject":  "Expiration of your password",
+        "Priority":  100
+    }
+]
