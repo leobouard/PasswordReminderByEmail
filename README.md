@@ -91,7 +91,7 @@ Company | CONTOSO | String
 Country | FR | String
 CanonicalName | domain.com/CONTOSO/Users/John Doe | String
 DistinguishedName | CN=John Doe,OU=Users,OU=CONTOSO,DC=domain,DC=com | String
-PasswordPolicy | DC=domain,DC=com* | ADDefaultDomainPasswordPolicy/ADFineGrainedPasswordPolicy
+PasswordPolicy | DC=domain,DC=com* | ADDefaultDomainPasswordPolicy or ADFineGrainedPasswordPolicy
 Template | default | String
 
 #### Password Policy property
