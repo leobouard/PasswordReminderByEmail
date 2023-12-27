@@ -1,10 +1,21 @@
-﻿﻿[CmdletBinding(SupportsShouldProcess=$True)]
-Param(
+﻿﻿Param(
     [Parameter(Mandatory=$true)][array]$ExpireInDays,
     [array]$TestRecipient,
     [string]$SearchBase = ((Get-ADDomain).DistinguishedName),
-    [System.IO.FileInfo]$Layout = "$PSScriptRoot\layout.html"
+    [System.IO.FileInfo]$Layout = "$PSScriptRoot\layout.html",
+    [int]$LogHistory = 30
 )
+
+# Start transcript
+Start-Transcript -Path "$PSScriptRoot\logs\PasswordReminderByEmail_$($SearchBase)_$(Get-Date -Format 'yyyy-MM-dd_HHmmss').txt" -UseMinimalHeader
+
+# Remove old log files
+Write-Verbose -Message "Removing logs files older than $LogHistory day(s) ago"
+Get-ChildItem -Path "$PSScriptRoot\logs" -Recurse | Where-Object {
+    $_.BaseName -like "PasswordReminderByEmail_*" -and 
+    $_.Extension -eq ".txt" -and 
+    $_.LastWriteTime -lt (Get-Date).AddDays(-$LogHistory)
+} | Remove-Item -Force -Confirm:$false -Verbose
 
 # Password policies
 $defaultDomainPasswordPolicy = Get-ADDefaultDomainPasswordPolicy
@@ -51,9 +62,9 @@ $fineGrainedPasswordPolicy | Sort-Object -Property Precedence -Descending | Fore
 
 # Formating the object
 $users = $users | Where-Object {$_.MaxPasswordAge -ne 0} | Sort-Object PasswordAge | Select-Object GivenName,Name,EmailAddress,PasswordAge,MaxPasswordAge,PasswordLastSet,LastLogonDate,
-        @{N="PasswordExpirationDate";E={($_.PasswordLastSet).AddDays($_.MaxPasswordAge)} },
-        @{N="DaysBeforeExpiration";E={$_.MaxPasswordAge-$_.PasswordAge}},
-        Title,Department,Company,Country,CanonicalName,DistinguishedName,PasswordPolicy,Template
+    @{N="PasswordExpirationDate";E={($_.PasswordLastSet).AddDays($_.MaxPasswordAge)} },
+    @{N="DaysBeforeExpiration";E={$_.MaxPasswordAge-$_.PasswordAge}},
+    Title,Department,Company,Country,CanonicalName,DistinguishedName,PasswordPolicy,Template
 
 # Filter out users
 Write-Verbose -Message "Excluding users with password that won't expires in the next $(($ExpireInDays | Sort-Object -Descending) -join ', ') day(s)"
@@ -72,9 +83,7 @@ $data | Where-Object {$_.Template -ne 'default'} | ForEach-Object {
 }
 
 # Displaying all information
-$users |
-    Select-Object Name,EmailAddress,DaysBeforeExpiration,template,passwordPolicy |
-    Sort-Object DaysBeforeExpiration | Format-Table
+$users | Select-Object Name,DaysBeforeExpiration,template,passwordPolicy | Sort-Object DaysBeforeExpiration | Format-Table
 
 # Send emails
 $templates = Get-ChildItem -Path "$PSScriptRoot\templates"
@@ -85,6 +94,7 @@ $users | ForEach-Object {
 
     # Get subject
     $subject = ($data | Where-Object {$_.Template -eq $user.Template}).Subject
+    $subject = $ExecutionContext.InvokeCommand.ExpandString($subject)
 
     # Get mail content
     $content = Get-Content -Path $file.FullName -Raw | Out-String
@@ -115,3 +125,6 @@ $users | ForEach-Object {
     # Clear variables
     Remove-Variable user,subject,file,content,body
 }
+
+# End transcript
+Stop-Transcript
