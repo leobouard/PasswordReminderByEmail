@@ -7,6 +7,7 @@
 )
 
 # Start transcript
+$start = Get-Date
 Start-Transcript -Path "$PSScriptRoot\logs\PasswordReminderByEmail_$($SearchBase)_$(Get-Date -Format 'yyyy-MM-dd_HHmmss').txt" -UseMinimalHeader
 
 # Remove old log files
@@ -110,8 +111,8 @@ $users | ForEach-Object {
         Body          = $body
         BodyAsHtml    = $true
         Encoding      = 'UTF8'
-        From          = "noreply@domain.com"
-        SmtpServer    = "smtp.domain.com"
+        From          = 'noreply@domain.com'
+        SmtpServer    = 'smtp.domain.com'
         Subject       = $subject
         To            = $_.EmailAddress
         WarningAction = 'SilentlyContinue'
@@ -125,6 +126,9 @@ $users | ForEach-Object {
     # Clear variables
     Remove-Variable user,subject,file,content,body
 }
+
+$stopwatch = [int](New-TimeSpan -Start $start).TotalSeconds
+Write-Verbose -Message "The script has completed in $stopwatch seconds"
 
 # End transcript
 Stop-Transcript
