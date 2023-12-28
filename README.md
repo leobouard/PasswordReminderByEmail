@@ -14,8 +14,9 @@ Inform your users by email when their password is about to expire with localized
 2. Add or modify translations available in the `templates` folder
 3. Edit the `data.json` to apply translations to your users using filters
 4. Brand the `layout.html` with your logo and colors
-5. Do a test run of the script using the parameter `-TestRecipient`
-6. If everything is alright, you can put the script into scheduled task
+5. Make sure that you have access to fine-grained password policies (container `CN=Password Setting Container`)
+6. Do a test run of the script using the parameter `-TestRecipient`
+7. If everything is alright, you can put the script into scheduled task
 
 ## Features
 
@@ -102,6 +103,8 @@ The property on the user object give you full details about the password policy 
 - MinPasswordAge
 - MinPasswordLength
 - PasswordHistoryCount
+
+**Reminder:** Authenticated Users do not have access to fine-grained password policies by default. [How to display fine-grained password policy settings to Authenticated Users? - Synergix Support](https://synergixdesk.zendesk.com/hc/en-us/articles/202927708-How-to-display-fine-grained-password-policy-settings-to-Authenticated-Users-).
 
 ## Parameters
 
