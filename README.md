@@ -73,26 +73,15 @@ For the footer, you can replace the "Made with ♥ by Léo Bouard" by your compa
 
 ### Available user information
 
-The following information are available at anytime in the `ForEach-Object` loop. You can use it directly in the Markdown files used for translation or in the email subjets written in the `data.json` file.
+All Active Directory user information are available at anytime in the `ForEach-Object` loop. You can use it directly in the Markdown files used for translation or in the email subjets written in the `data.json` file. Some properties are added to the default user objects:
 
 Property | Value | Type
 -------- | ----- | ----
-GivenName | John | String
-Name | John Doe | String
-EmailAddress | john.doe@domain | String
 PasswordAge | 165 | Double
 MaxPasswordAge | 180 | Double
-PasswordLastSet | 15/07/2023 09:45:04 | DateTime
-LastLogonDate | 26/12/2023 08:31:21 | DateTime
 PasswordExpirationDate | 11/01/2024 09:45:04 | DateTime
 DaysBeforeExpiration | 15 | Double
-Title | System Administrator | String
-Department | IT | String
-Company | CONTOSO | String
-Country | FR | String
-CanonicalName | domain.com/CONTOSO/Users/John Doe | String
-DistinguishedName | CN=John Doe,OU=Users,OU=CONTOSO,DC=domain,DC=com | String
-PasswordPolicy | DC=domain,DC=com* | ADDefaultDomainPasswordPolicy or ADFineGrainedPasswordPolicy
+PasswordPolicy | DC=domain,DC=com | AD Default Domain Password Policy or AD Fine Grained Password Policy
 Template | default | String
 
 #### Password Policy property

@@ -28,8 +28,7 @@ Write-Verbose -Message "Get all fine-grained password policies: $($fineGrainedPa
 
 # Get all users
 Write-Verbose -Message "Search for all users on `'$SearchBase`'..."
-$properties = 'GivenName','DisplayName','PasswordNeverExpires','PasswordExpired','PasswordLastSet','LastLogonDate','EmailAddress','MemberOf','CanonicalName','Title','Department','Company','Country'
-$users = Get-ADUser -Filter {(Enabled -eq $true) -and (PasswordNeverExpires -eq $false) -and (PasswordExpired -eq $false)} -Properties $properties -SearchBase $SearchBase |
+$users = Get-ADUser -Filter {(Enabled -eq $true) -and (PasswordNeverExpires -eq $false) -and (PasswordExpired -eq $false)} -Properties * -SearchBase $SearchBase |
     Where-Object {$_.PasswordLastSet -and $_.EmailAddress}
 Write-Verbose -Message "$(($users | Measure-Object).Count) users found!"
 
@@ -62,10 +61,9 @@ $fineGrainedPasswordPolicy | Sort-Object -Property Precedence -Descending | Fore
 }
 
 # Formating the object
-$users = $users | Where-Object {$_.MaxPasswordAge -ne 0} | Sort-Object PasswordAge | Select-Object GivenName,Name,EmailAddress,PasswordAge,MaxPasswordAge,PasswordLastSet,LastLogonDate,
-    @{N="PasswordExpirationDate";E={($_.PasswordLastSet).AddDays($_.MaxPasswordAge)} },
-    @{N="DaysBeforeExpiration";E={$_.MaxPasswordAge-$_.PasswordAge}},
-    Title,Department,Company,Country,CanonicalName,DistinguishedName,PasswordPolicy,Template
+$users = $users | Where-Object {$_.MaxPasswordAge -ne 0} | Sort-Object PasswordAge | Select-Object *,
+    @{N="PasswordExpirationDate";E={($_.PasswordLastSet).AddDays($_.MaxPasswordAge)}},
+    @{N="DaysBeforeExpiration";E={$_.MaxPasswordAge-$_.PasswordAge}}
 
 # Filter out users
 Write-Verbose -Message "Excluding users with password that won't expires in the next $(($ExpireInDays | Sort-Object -Descending) -join ', ') day(s)"
