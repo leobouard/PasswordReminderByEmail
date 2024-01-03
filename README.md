@@ -119,4 +119,9 @@ Send a test email to <test@domain.com> for users with a password that will expir
 .\script.ps1 -ExpireInDays 1..10 -TestRecipient 'test@domain.com'
 ```
 
-For use as a scheduled task, remember to specify the `-Verbose` parameter to access all script logs.
+### As a scheduled task
+
+This script has been created for use in a scheduled task. You can create one with a daily trigger and the following action:
+
+- Program/script: `"C:\Program Files\PowerShell\7\pwsh.exe"`
+- Add arguments (optional): `-Command "& 'C:\scripts\PasswordReminderByEmail\script.ps1' -ExpireInDays 15,10,5,3,2,1 -Verbose"`
