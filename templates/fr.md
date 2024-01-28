@@ -2,7 +2,7 @@
 
 Bonjour $($user.GivenName),
 
-Le mot de passe de votre compte expirera dans $($user.DaysBeforeExpiration) day(s).
+Le mot de passe de votre compte expirera dans $($user.DaysBeforeExpiration) jour(s).
 
 Pour garantir un accès continu à votre compte, veuillez modifier votre mot de passe avant le $((Get-Date $user.PasswordExpirationDate).ToString("D", [System.Globalization.CultureInfo]::CreateSpecificCulture('fr'))).
 
