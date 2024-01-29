@@ -2,7 +2,7 @@
     [Parameter(Mandatory=$true)][array]$ExpireInDays,
     [array]$TestRecipient,
     [string]$SearchBase = ((Get-ADDomain).DistinguishedName),
-    [System.IO.FileInfo]$Layout = "$PSScriptRoot\layout.html",
+    [string]$Layout = ((Get-Item -Path "$PSScriptRoot\layout.html").FullName),
     [int]$LogHistory = 30
 )
 

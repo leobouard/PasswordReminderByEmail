@@ -116,7 +116,8 @@ Send an email to users from "domain.com/CONTOSO" with a password that will expir
 Send a test email to <test@domain.com> for users with a password that will expire in the next 10 days :
 
 ```powershell
-.\script.ps1 -ExpireInDays 1..10 -TestRecipient 'test@domain.com'
+$exp = 10,9,8,7,6,5,4,3,2,1
+.\script.ps1 -ExpireInDays $exp -TestRecipient 'test@domain.com'
 ```
 
 ### As a scheduled task
