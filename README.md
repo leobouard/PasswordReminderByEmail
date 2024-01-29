@@ -79,7 +79,7 @@ Property | Value | Type
 -------- | ----- | ----
 PasswordAge | 165 | Double
 MaxPasswordAge | 180 | Double
-PasswordExpirationDate | 11/01/2024 09:45:04 | DateTime
+PasswordExpirationDate | 2024-01-11 09:45:04 | DateTime
 DaysBeforeExpiration | 15 | Double
 PasswordPolicy | DC=domain,DC=com | AD Default Domain Password Policy or AD Fine Grained Password Policy
 Template | default | String
