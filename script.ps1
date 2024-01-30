@@ -28,8 +28,13 @@ Write-Verbose -Message "Get all fine-grained password policies: $($fineGrainedPa
 
 # Get all users
 Write-Verbose -Message "Search for all users on `'$SearchBase`'..."
-$users = Get-ADUser -Filter {(Enabled -eq $true) -and (PasswordNeverExpires -eq $false) -and (PasswordExpired -eq $false)} -Properties * -SearchBase $SearchBase |
-    Where-Object {$_.PasswordLastSet -and $_.EmailAddress}
+# userAccountControl:1.2.840.113556.1.4.803:=2 : disabled users so we look for users that are not (!) disabled
+# pwdLastSet=* : users that have a password set
+# userAccountControl:1.2.840.113556.1.4.803:=65536 : users that have the "password never expires" flag set so we look for users that do not (!) have this flag set
+# mail=* : users that have an email address set
+# LDAPFilter is faster than Filter and Where-Object for large AD
+$ldapFilter = "(&(objectClass=User)(!(userAccountControl:1.2.840.113556.1.4.803:=2))(pwdLastSet=*)(!(userAccountControl:1.2.840.113556.1.4.803:=65536)(mail=*)))"
+$users = Get-ADUser -LDAPFilter $ldapFilter -Properties * -SearchBase $SearchBase
 Write-Verbose -Message "$(($users | Measure-Object).Count) users found!"
 
 # Add the password age
