@@ -10,7 +10,7 @@ Inform your users by email when their password is about to expire with localized
 
 ## Quick setup
 
-1. Modify the `script.ps1` to indicate the sender email address (`From`) and SMTP server (`SmtpServer`) in the `Send-MailMessage` splatting
+1. Modify the `PasswordReminderByEmail.ps1` to indicate the sender email address (`From`) and SMTP server (`SmtpServer`) in the `Send-MailMessage` splatting
 2. Add or modify translations available in the `templates` folder
 3. Edit the `data.json` to apply translations to your users using filters
 4. Brand the `layout.html` with your logo and colors
@@ -110,14 +110,14 @@ Here's the script parameters:
 Send an email to users from "domain.com/CONTOSO" with a password that will expire in 15, 10, 5 and 1 day(s) before its expiration:
 
 ```powershell
-.\script.ps1 -ExpireInDays 15,10,5,1 -SearchBase 'OU=CONTOSO,DC=domain,DC=com' -Verbose
+.\PasswordReminderByEmail.ps1 -ExpireInDays 15,10,5,1 -SearchBase 'OU=CONTOSO,DC=domain,DC=com' -Verbose
 ```
 
 Send a test email to <test@domain.com> for users with a password that will expire in the next 10 days :
 
 ```powershell
 $exp = 10,9,8,7,6,5,4,3,2,1
-.\script.ps1 -ExpireInDays $exp -TestRecipient 'test@domain.com'
+.\PasswordReminderByEmail.ps1 -ExpireInDays $exp -TestRecipient 'test@domain.com'
 ```
 
 ### As a scheduled task
@@ -125,4 +125,4 @@ $exp = 10,9,8,7,6,5,4,3,2,1
 This script has been created for use in a scheduled task. You can create one with a daily trigger and the following action:
 
 - Program/script: `"C:\Program Files\PowerShell\7\pwsh.exe"`
-- Add arguments (optional): `-Command "& 'C:\scripts\PasswordReminderByEmail\script.ps1' -ExpireInDays 15,10,5,1 -Verbose"`
+- Add arguments (optional): `-Command "& 'C:\scripts\PasswordReminderByEmail\PasswordReminderByEmail.ps1' -ExpireInDays 15,10,5,1 -Verbose"`
