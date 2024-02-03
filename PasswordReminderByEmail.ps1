@@ -1,8 +1,8 @@
-﻿﻿Param(
+param(
     [Parameter(Mandatory=$true)][array]$ExpireInDays,
     [array]$TestRecipient,
     [string]$SearchBase = ((Get-ADDomain).DistinguishedName),
-    [string]$Layout = ((Get-Item -Path "$PSScriptRoot\layout.html" | Select-Object @{N='Path';E={$_.FullName}}).Path),
+    [string]$Layout = "$PSScriptRoot\layout.html",
     [int]$LogHistory = 30
 )
 
@@ -13,8 +13,8 @@ Start-Transcript -Path "$PSScriptRoot\logs\PasswordReminderByEmail_$($SearchBase
 # Remove old log files
 Write-Verbose -Message "Removing logs files older than $LogHistory day(s) ago"
 Get-ChildItem -Path "$PSScriptRoot\logs" -Recurse | Where-Object {
-    $_.BaseName -like "PasswordReminderByEmail_*" -and 
-    $_.Extension -eq ".txt" -and 
+    $_.BaseName -like 'PasswordReminderByEmail_*' -and 
+    $_.Extension -eq '.txt' -and 
     $_.LastWriteTime -lt (Get-Date).AddDays(-$LogHistory)
 } | Remove-Item -Force -Confirm:$false -Verbose
 
@@ -28,29 +28,24 @@ Write-Verbose -Message "Get all fine-grained password policies: $($fineGrainedPa
 
 # Get all users
 Write-Verbose -Message "Search for all users on `'$SearchBase`'..."
-# userAccountControl:1.2.840.113556.1.4.803:=2 : disabled users so we look for users that are not (!) disabled
-# pwdLastSet=* : users that have a password set
-# userAccountControl:1.2.840.113556.1.4.803:=65536 : users that have the "password never expires" flag set so we look for users that do not (!) have this flag set
-# mail=* : users that have an email address set
-# LDAPFilter is faster than Filter and Where-Object for large AD
-$ldapFilter = "(&(objectClass=User)(!(userAccountControl:1.2.840.113556.1.4.803:=2))(pwdLastSet=*)(!(userAccountControl:1.2.840.113556.1.4.803:=65536)(mail=*)))"
+$ldapFilter = '(&(objectClass=User)(!(userAccountControl:1.2.840.113556.1.4.803:=2))(pwdLastSet=*)(!(userAccountControl:1.2.840.113556.1.4.803:=65536)(mail=*)))'
 $users = Get-ADUser -LDAPFilter $ldapFilter -Properties * -SearchBase $SearchBase
 Write-Verbose -Message "$(($users | Measure-Object).Count) users found!"
 
 # Add the password age
-Write-Verbose -Message "Add new properties with default values"
+Write-Verbose -Message 'Add new properties with default values'
 $users | ForEach-Object {
     $passwordAge = (New-TimeSpan -Start $_.PasswordLastSet -End (Get-Date)).TotalDays
     $passwordAge = [math]::Round($passwordAge,0)
-    $_ | Add-Member -MemberType "NoteProperty" -Name "PasswordAge" -Value $passwordAge -Force
-    $_ | Add-Member -MemberType "NoteProperty" -Name "MaxPasswordAge" -Value $defaultMaxPasswordAge -Force
-    $_ | Add-Member -MemberType "NoteProperty" -Name "PasswordPolicy" -Value $defaultDomainPasswordPolicy -Force
-    $_ | Add-Member -MemberType "NoteProperty" -Name "Template" -Value "default" -Force
+    $_ | Add-Member -MemberType NoteProperty -Name PasswordAge -Value $passwordAge -Force
+    $_ | Add-Member -MemberType NoteProperty -Name MaxPasswordAge -Value $defaultMaxPasswordAge -Force
+    $_ | Add-Member -MemberType NoteProperty -Name PasswordPolicy -Value $defaultDomainPasswordPolicy -Force
+    $_ | Add-Member -MemberType NoteProperty -Name Template -Value default -Force
     Remove-Variable passwordAge
 }
 
 # Fine grained password policy
-Write-Verbose -Message "New properties updated for users exposed to fine-grained password policies"
+Write-Verbose -Message 'New properties updated for users exposed to fine-grained password policies'
 $fineGrainedPasswordPolicy | Sort-Object -Property Precedence -Descending | Foreach-Object {
     $passwordPolicy = $_
     $maxPasswordAge = [math]::Round($_.MaxPasswordAge.TotalDays,0)
@@ -67,8 +62,8 @@ $fineGrainedPasswordPolicy | Sort-Object -Property Precedence -Descending | Fore
 
 # Formating the object
 $users = $users | Where-Object {$_.MaxPasswordAge -ne 0} | Sort-Object PasswordAge | Select-Object *,
-    @{N="PasswordExpirationDate";E={($_.PasswordLastSet).AddDays($_.MaxPasswordAge)}},
-    @{N="DaysBeforeExpiration";E={$_.MaxPasswordAge-$_.PasswordAge}}
+    @{N='PasswordExpirationDate';E={($_.PasswordLastSet).AddDays($_.MaxPasswordAge)}},
+    @{N='DaysBeforeExpiration';E={$_.MaxPasswordAge-$_.PasswordAge}}
 
 # Filter out users
 Write-Verbose -Message "Excluding users with password that won't expires in the next $(($ExpireInDays | Sort-Object -Descending) -join ', ') day(s)"
