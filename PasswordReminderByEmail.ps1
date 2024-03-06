@@ -1,5 +1,5 @@
 param(
-    [Parameter(Mandatory=$true)][array]$ExpireInDays,
+    [Parameter(Mandatory=$true)][int[]]$ExpireInDays = (15,10,5,3,2,1),
     [array]$TestRecipient,
     [string]$SearchBase = ((Get-ADDomain).DistinguishedName),
     [string]$Layout = "$PSScriptRoot\layout.html",
@@ -45,17 +45,21 @@ $users | ForEach-Object {
 }
 
 # Fine grained password policy
-Write-Verbose -Message 'New properties updated for users exposed to fine-grained password policies'
+Write-Verbose -Message "New properties updated for users exposed to fine-grained password policies"
 $fineGrainedPasswordPolicy | Sort-Object -Property Precedence -Descending | Foreach-Object {
+    Write-Verbose -Message "Processing $($_.Name)"
     $passwordPolicy = $_
     $maxPasswordAge = [math]::Round($_.MaxPasswordAge.TotalDays,0)
     $_.AppliesTo | Foreach-Object {
-        $appliesToObject = $_
-        $users | Where-Object {$_.MemberOf -contains $appliesToObject -or $_.DistinguishedName -eq $appliesToObject} | ForEach-Object {
+        $targetObject = Get-ADObject $_
+        if ($targetObject.ObjectClass -eq 'group') {
+            $members = Get-ADGroupMember $targetObject -Recursive
+        }
+        $users | Where-Object {$_.DistinguishedName -in $members.DistinguishedName -or $_.DistinguishedName -eq $targetObject.DistinguishedName} | ForEach-Object {
             $_.MaxPasswordAge = $maxPasswordAge
             $_.PasswordPolicy = $passwordPolicy
         }
-        Remove-Variable appliesToObject
+        Remove-Variable targetObject,members
     }
     Remove-Variable passwordPolicy,maxPasswordAge
 }
