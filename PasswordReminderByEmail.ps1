@@ -55,11 +55,14 @@ $fineGrainedPasswordPolicy | Sort-Object -Property Precedence -Descending | Fore
         if ($targetObject.ObjectClass -eq 'group') {
             $members = Get-ADGroupMember $targetObject -Recursive
         }
+        else {
+            $members = $targetObject
+        }
         $users | Where-Object {$_.DistinguishedName -in $members.DistinguishedName -or $_.DistinguishedName -eq $targetObject.DistinguishedName} | ForEach-Object {
             $_.MaxPasswordAge = $maxPasswordAge
             $_.PasswordPolicy = $passwordPolicy
         }
-        Remove-Variable targetObject,members -ErrorAction SilentlyContinue
+        Remove-Variable targetObject,members
     }
     Remove-Variable passwordPolicy,maxPasswordAge
 }
