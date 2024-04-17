@@ -59,7 +59,7 @@ $fineGrainedPasswordPolicy | Sort-Object -Property Precedence -Descending | Fore
             $_.MaxPasswordAge = $maxPasswordAge
             $_.PasswordPolicy = $passwordPolicy
         }
-        Remove-Variable targetObject,members
+        Remove-Variable targetObject,members -ErrorAction SilentlyContinue
     }
     Remove-Variable passwordPolicy,maxPasswordAge
 }
